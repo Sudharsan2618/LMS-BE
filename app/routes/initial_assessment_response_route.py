@@ -24,10 +24,16 @@ def post_initial_assessment_response():
 
     try:
         # Perform upsert (insert or update) operation
-        upsert_initial_assessment_response(conn, user_id, question_id, selected_option_id, tab_id)
+        result = upsert_initial_assessment_response(conn, user_id, question_id, selected_option_id, tab_id)
         
+        if 'error' in result:
+            return jsonify({'error': result['error']}), 404  # Not Found: User ID does not exist
+
         # Return success response
         return jsonify({'message': 'Response successfully saved or updated'}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {e}'}), 500
 
     finally:
         conn.close()
