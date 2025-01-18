@@ -20,13 +20,14 @@ def signup():
         return jsonify({'error': 'Database connection failed'}), 500
 
     try:
-        # Create the user in the database
-        user = create_user(conn, username, email, password)
-        return jsonify({'message': 'Sign-up successful', 'user': user}), 201
+        # Attempt to create the user
+        result = create_user(conn, username, email, password)
+        
+        if "error" in result:  # Check if the result contains an error message
+            return jsonify({'error': result['error']}), 409  # Conflict: Email already exists
+        
+        return jsonify({'message': 'Sign-up successful', 'user': result}), 201  # User created successfully
     except Exception as e:
-        if 'unique constraint' in str(e).lower():
-            return jsonify({'error': 'Username or email already exists'}), 409
-        else:
-            return jsonify({'error': f'An error occurred: {e}'}), 500
+        return jsonify({'error': f'An error occurred: {e}'}), 500
     finally:
         conn.close()
