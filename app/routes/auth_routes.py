@@ -21,6 +21,7 @@ def login_with_email():
 
     try:
         user = find_user_by_email(conn, email, password)
+        print(user)
         if user:
             return jsonify({'message': 'Login successful', 'user': user}), 200
         else:

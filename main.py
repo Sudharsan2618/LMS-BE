@@ -5,6 +5,7 @@ from app.routes.initial_assessment_response_route import initial_assessment_resp
 from app.routes.home_header_routes import home_bp
 from app.routes.course_master_routes import course_bp
 from app.routes.user_persona_routes import user_bp
+from app.routes.initial_assessment_route import user_initial_assessment_bp
 from flask import Flask
 from flask_cors import CORS
 
@@ -19,6 +20,7 @@ app.register_blueprint(initial_assessment_responses_bp)
 app.register_blueprint(home_bp)
 app.register_blueprint(course_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(user_initial_assessment_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
