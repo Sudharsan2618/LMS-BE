@@ -7,6 +7,7 @@ from app.routes.course_master_routes import course_bp, courseenrollment_bp
 from app.routes.user_persona_routes import user_bp
 from app.routes.initial_assessment_route import user_initial_assessment_bp
 from app.routes.course_master_routes import userenrollment_bp
+from app.routes.ebook_routes import ebook_bp
 from flask import Flask
 from flask_cors import CORS
 
@@ -24,6 +25,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(user_initial_assessment_bp)
 app.register_blueprint(courseenrollment_bp)
 app.register_blueprint(userenrollment_bp)
+app.register_blueprint(ebook_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
