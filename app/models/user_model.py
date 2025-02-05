@@ -1,7 +1,7 @@
 from psycopg2.extras import RealDictCursor
 
 def find_user_by_email(conn, email, password):
-    query = "SELECT user_id, initial_assessment FROM lms.users WHERE email = %s AND password = %s"
+    query = "SELECT user_id,username, initial_assessment FROM lms.users WHERE email = %s AND password = %s"
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute(query, (email, password))
         return cursor.fetchone()

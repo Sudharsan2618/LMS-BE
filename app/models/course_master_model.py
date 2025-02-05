@@ -21,9 +21,10 @@ def get_courses(conn):
 
 def find_course_by_id(conn, course_id):
     query = """
-    SELECT course_id, course_description, course_objective, pre_requirments, course_level, roles, course_type
-    FROM lms.course_enrollment
-    WHERE course_id = %s
+    SELECT c.course_id, m.course_name, c.course_description, c.course_objective, c.pre_requirments, c.course_level, c.roles, c.course_type
+    FROM lms.course_enrollment c
+	join lms.course_master as m on m.course_id = c.course_id
+    WHERE c.course_id = %s
     """
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute(query, (course_id,))
