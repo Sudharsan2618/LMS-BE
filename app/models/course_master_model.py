@@ -8,9 +8,7 @@ def get_courses(conn):
         course_short_description, 
         course_type, 
         course_duration_hours, 
-        course_duration_minutes, 
-        course_status, 
-        course_progress, 
+        course_duration_minutes,  
         language, 
         rating 
     FROM lms.course_master
