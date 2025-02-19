@@ -12,7 +12,7 @@ def create_user(conn, username, email, password):
     insert_query = """
     INSERT INTO lms.users (username, email, password) 
     VALUES (%s, %s, %s) 
-    RETURNING id, username, email
+    RETURNING user_id as id, username, email
     """
     
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
