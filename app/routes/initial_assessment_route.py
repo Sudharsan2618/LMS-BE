@@ -5,13 +5,14 @@ from app.models.initial_assessment_model import get_user_initial_assessment_deta
 
 user_initial_assessment_bp = Blueprint('user_initial_assessment', __name__)
 
-@user_initial_assessment_bp.route('/api/user-initial-assessment-details', methods=['GET'])
+@user_initial_assessment_bp.route('/api/user-initial-assessment-details', methods=['POST'])
 def get_user_details_route():
     # Extract user_id from the request header
-    user_id = request.headers.get('user_id')
-    print(request.headers)
-    if not user_id:
-        return jsonify({'error': 'user_id is required in the headers'}), 400
+    data=request.get_json()
+    if not data or 'user_id' not in data:
+        return jsonify({'error': 'user_id is required in the request body'}), 400
+        
+    user_id = data['user_id']
 
     conn = get_db_connection(DB_CONFIG)
     if not conn:
