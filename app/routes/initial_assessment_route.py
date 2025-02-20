@@ -7,22 +7,23 @@ user_initial_assessment_bp = Blueprint('user_initial_assessment', __name__)
 
 @user_initial_assessment_bp.route('/api/user-initial-assessment-details', methods=['POST'])
 def get_user_details_route():
-    # Extract user_id from the request header
-    data=request.get_json()
-    if not data or 'user_id' not in data:
-        return jsonify({'error': 'user_id is required in the request body'}), 400
-        
-    user_id = data['user_id']
+    data = request.get_json()
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'User ID is required'}), 400
 
     conn = get_db_connection(DB_CONFIG)
     if not conn:
         return jsonify({'error': 'Database connection failed'}), 500
 
     try:
-        user_details = get_user_initial_assessment_details(conn, user_id)
-        if user_details:
-            return jsonify({'message': 'User details fetched successfully', 'user': user_details}), 200
+        # Insert or update the assessment results in the database
+        success = get_user_initial_assessment_details(conn, user_id)
+        
+        if success:
+            return jsonify({'message': 'Assessment results successfully recorded'}), 200
         else:
-            return jsonify({'error': 'User not found'}), 404
+            return jsonify({'error': 'Failed to record assessment results'}), 500
     finally:
         conn.close()
