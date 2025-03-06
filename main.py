@@ -10,6 +10,7 @@ from app.routes.course_master_routes import userenrollment_bp
 from app.routes.ebook_routes import ebook_bp
 from app.routes.course_content_route import course_content_bp
 from app.routes.course_assessment_route import course_assessment_bp
+from app.routes.user_details_route import userdetails_bp
 from flask import Flask
 from flask_cors import CORS
 
@@ -30,6 +31,7 @@ app.register_blueprint(userenrollment_bp)
 app.register_blueprint(ebook_bp)
 app.register_blueprint(course_content_bp)
 app.register_blueprint(course_assessment_bp)
+app.register_blueprint(userdetails_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
