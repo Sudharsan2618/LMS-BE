@@ -34,8 +34,12 @@ def update_or_insert_course_progress(conn, user_id, course_id, course_subtitle_i
 
 def user_course_status(conn, user_id, course_id):
     procedure_call = """
-    select cstp.course_master_breakdown_id, cstp.progress_percentage
+    select cstp.course_master_breakdown_id, cstp.progress_percentage, ucp.course_subtitle_id, ucp.course_subtitle_progress
     from lms.user_course_sub_title_progress as cstp 
+    left join lms.user_course_progress as ucp
+    on ucp.course_mastertitle_breakdown_id = cstp.course_master_breakdown_id 
+    and ucp.course_id = cstp.course_id
+    and ucp.user_id = cstp.user_id
     where cstp.user_id = %s and cstp.course_id = %s
     """
     
