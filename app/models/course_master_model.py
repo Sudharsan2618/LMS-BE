@@ -17,15 +17,35 @@ def get_courses(conn):
         cursor.execute(query)
         return cursor.fetchall()  # Fetch all rows as dictionaries
 
-def find_course_by_id(conn, course_id):
+def find_course_by_id(conn, user_id,course_id):
     query = """
-    SELECT c.course_id, m.course_name, c.course_description, c.course_objective, c.pre_requirments, c.course_level, c.roles, c.course_type
-    FROM lms.course_enrollment c
-	join lms.course_master as m on m.course_id = c.course_id
-    WHERE c.course_id = %s
+    SELECT 
+    c.course_id, 
+    m.course_name, 
+    c.course_description, 
+    c.course_objective, 
+    c.pre_requirments, 
+    c.course_level, 
+    c.roles, 
+    c.course_type,
+    CASE 
+        WHEN uce.user_id IS NOT NULL THEN true 
+        ELSE false 
+    END AS enroll
+FROM 
+    lms.course_enrollment c
+JOIN 
+    lms.course_master AS m 
+    ON m.course_id = c.course_id
+LEFT JOIN 
+    lms.user_course_enrollment AS uce
+    ON uce.course_id = c.course_id AND uce.user_id = %s
+WHERE 
+    c.course_id = %s;
+
     """
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        cursor.execute(query, (course_id,))
+        cursor.execute(query, (user_id,course_id))
         return cursor.fetchone()
     
 def enroll_user_in_course(conn, user_id, course_id):

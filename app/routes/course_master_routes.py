@@ -27,6 +27,7 @@ courseenrollment_bp = Blueprint('courseenrollment', __name__)
 def get_course_enrollment_details():
     data = request.get_json()
     course_id = data.get('course_id')
+    user_id = data.get('user_id')
 
     if not course_id:
         return jsonify({'error': 'Course ID is required'}), 400
@@ -36,7 +37,7 @@ def get_course_enrollment_details():
         return jsonify({'error': 'Database connection failed'}), 500
 
     try:
-        course = find_course_by_id(conn, course_id)
+        course = find_course_by_id(conn, user_id,course_id)
         if course:
             return jsonify({'course': course}), 200
         else:
