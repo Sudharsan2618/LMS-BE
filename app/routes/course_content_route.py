@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.utils.db_utils import get_db_connection
-from app.models.course_content_model import get_course_data, update_or_insert_course_progress
+from app.models.course_content_model import get_course_data, update_or_insert_course_progress, user_course_status
 from app.config.database import DB_CONFIG
 
 course_content_bp = Blueprint('course_content', __name__)
@@ -48,6 +48,29 @@ def update_or_insert_progress():
         result = update_or_insert_course_progress(
             conn, user_id, course_id, course_subtitle_id, 
             course_mastertitle_breakdown_id, course_subtitle_progress
+        )
+        return jsonify({'message': 'Operation successful', 'data': result}), 200
+    finally:
+        conn.close()
+
+
+@course_content_bp.route('/api/userCourseStatus', methods=['POST'])
+def get_user_course_status():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    course_id = data.get('course_id')
+
+
+    if not all([user_id, course_id]):
+        return jsonify({'error': 'All fields are required'}), 400
+
+    conn = get_db_connection(DB_CONFIG)
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        result = user_course_status(
+            conn, user_id, course_id
         )
         return jsonify({'message': 'Operation successful', 'data': result}), 200
     finally:
