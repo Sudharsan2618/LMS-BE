@@ -3,7 +3,7 @@ from psycopg2.extras import RealDictCursor
 def get_course_data(conn, course_id, user_id):
     query = "SELECT * FROM get_course_data(%s, %s)"
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        cursor.execute(query, (course_id, user_id))
+        cursor.execute(query, (user_id, course_id))
         return cursor.fetchall()
 
 
