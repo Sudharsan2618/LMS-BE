@@ -35,10 +35,9 @@ def update_or_insert_progress():
     course_id = data.get('course_id')
     course_subtitle_id = data.get('course_subtitle_id')
     course_mastertitle_breakdown_id = data.get('course_mastertitle_breakdown_id')
-    course_progress = data.get('course_progress')
     course_subtitle_progress = data.get('course_subtitle_progress')
 
-    if not all([user_id, course_id, course_subtitle_id, course_mastertitle_breakdown_id, course_progress, course_subtitle_progress]):
+    if not all([user_id, course_id, course_subtitle_id, course_mastertitle_breakdown_id, course_subtitle_progress]):
         return jsonify({'error': 'All fields are required'}), 400
 
     conn = get_db_connection(DB_CONFIG)
@@ -48,7 +47,7 @@ def update_or_insert_progress():
     try:
         result = update_or_insert_course_progress(
             conn, user_id, course_id, course_subtitle_id, 
-            course_mastertitle_breakdown_id, course_progress, course_subtitle_progress
+            course_mastertitle_breakdown_id, course_subtitle_progress
         )
         return jsonify({'message': 'Operation successful', 'data': result}), 200
     finally:
