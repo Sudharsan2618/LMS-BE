@@ -47,7 +47,7 @@ def user_course_status(conn, user_id, course_id):
         ))
         
         # Fetch the returned average progress from the function
-        result = cursor.fetchone()
+        result = cursor.fetchall()
         conn.commit()
-        
+        print("result", result)
         return result
