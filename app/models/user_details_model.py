@@ -3,26 +3,30 @@ from psycopg2.extras import RealDictCursor
 def get_user_details_with_badges_and_courses(conn, user_id):
     query = """
 SELECT 
-    u.user_id, 
-    u.user_name, 
-    u.age, 
-    u.mobile_number, 
-    u.mail_id, 
-    u.city, 
-    u.area_of_interest, 
-    u.highest_qualification, 
-    u.year_of_passedout, 
-    u.designation, 
-    u.ambition, 
-    u.current_organization, 
-    u.job_title, 
-    u.work_experience, 
-    u.linkedin_profile, 
-    u.github_profile, 
-    u.portfolio_website, 
-    u.profile_picture_url,
+    u.user_id,
+    -- User details aggregated as a single JSON object
+    jsonb_build_object(
+        'user_id', u.user_id,
+        'user_name', u.user_name,
+        'age', u.age,
+        'mobile_number', u.mobile_number,
+        'mail_id', u.mail_id,
+        'city', u.city,
+        'area_of_interest', u.area_of_interest,
+        'highest_qualification', u.highest_qualification,
+        'year_of_passedout', u.year_of_passedout,
+        'designation', u.designation,
+        'ambition', u.ambition,
+        'current_organization', u.current_organization,
+        'job_title', u.job_title,
+        'work_experience', u.work_experience,
+        'linkedin_profile', u.linkedin_profile,
+        'github_profile', u.github_profile,
+        'portfolio_website', u.portfolio_website,
+        'profile_picture_url', u.profile_picture_url
+    ) AS user_details,
     
-    -- Badge information as a JSON object
+    -- Badge information as a JSON array
     CASE WHEN COUNT(DISTINCT bm.badge_id) > 0 THEN
         json_agg(
             DISTINCT jsonb_build_object(
