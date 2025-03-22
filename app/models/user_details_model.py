@@ -25,7 +25,28 @@ SELECT
         'portfolio_website', u.portfolio_website,
         'profile_picture_url', u.profile_picture_url
     ) AS user_details,
-    
+	
+jsonb_build_object(
+    'Technical Skill', CASE 
+                          WHEN iar.tech_skill = 50 THEN 'average'
+                          WHEN iar.tech_skill = 80 THEN 'good'
+                          WHEN iar.tech_skill = 100 THEN 'awesome'
+                          ELSE 'not rated'
+                       END,
+    'Psychology', CASE 
+                     WHEN iar.psychology = 50 THEN 'average'
+                     WHEN iar.psychology = 80 THEN 'good'
+                     WHEN iar.psychology = 100 THEN 'awesome'
+                     ELSE 'not rated'
+                  END,
+    'Learning Style', CASE 
+                         WHEN iar.learning_style = 50 THEN 'average'
+                         WHEN iar.learning_style = 80 THEN 'good'
+                         WHEN iar.learning_style = 100 THEN 'awesome'
+                         ELSE 'not rated'
+                      END
+) AS our_interpretation,
+
     -- Badge information as a JSON array
     CASE WHEN COUNT(DISTINCT bm.badge_id) > 0 THEN
         json_agg(
@@ -50,8 +71,7 @@ SELECT
                 'course_type', m.course_type,
                 'course_duration_hours', m.course_duration_hours,
                 'course_duration_minutes', m.course_duration_minutes,
-                'language', m.language,
-                'course_profile_image', m.course_profile_image
+                'language', m.language
             )
         )
         ELSE NULL
@@ -83,6 +103,8 @@ LEFT JOIN
     lms.user_certicate_enrollment AS uce2 ON uce2.user_id = u.user_id
 LEFT JOIN 
     lms.certificate_master AS cm ON uce2.certificate_id = cm.certificate_id
+left join 
+	lms.initial_assessment_results as iar on iar.user_id = u.user_id
 WHERE 
     u.user_id = %s
 GROUP BY 
