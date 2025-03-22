@@ -106,7 +106,7 @@ LEFT JOIN
 left join 
 	lms.initial_assessment_results as iar on iar.user_id = u.user_id
 WHERE 
-    u.user_id = %s
+    u.user_id = 8
 GROUP BY 
     u.user_id, 
     u.user_name, 
@@ -125,8 +125,11 @@ GROUP BY
     u.linkedin_profile, 
     u.github_profile, 
     u.portfolio_website, 
-    u.profile_picture_url;
-    """
+    u.profile_picture_url,
+	iar.tech_skill,
+	iar.psychology,
+	iar.learning_style;
+ """
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute(query, (user_id,))
         return cursor.fetchone()
