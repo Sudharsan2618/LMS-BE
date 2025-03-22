@@ -71,7 +71,8 @@ jsonb_build_object(
                 'course_type', m.course_type,
                 'course_duration_hours', m.course_duration_hours,
                 'course_duration_minutes', m.course_duration_minutes,
-                'language', m.language
+                'language', m.language,
+				'course_profile_image', m.course_profile_image
             )
         )
         ELSE NULL
@@ -129,7 +130,7 @@ GROUP BY
 	iar.tech_skill,
 	iar.psychology,
 	iar.learning_style;
- """
+    """
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute(query, (user_id,))
         return cursor.fetchone()
