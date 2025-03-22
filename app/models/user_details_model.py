@@ -37,7 +37,7 @@ def get_user_details_with_badges_and_courses(conn, user_id):
     """
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute(query, (user_id,))
-        return cursor.fetchall()
+        return cursor.fetchone()
 
 
 
