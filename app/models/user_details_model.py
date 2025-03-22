@@ -50,7 +50,8 @@ SELECT
                 'course_type', m.course_type,
                 'course_duration_hours', m.course_duration_hours,
                 'course_duration_minutes', m.course_duration_minutes,
-                'language', m.language
+                'language', m.language,
+                'course_profile_image', m.course_profile_image
             )
         )
         ELSE NULL

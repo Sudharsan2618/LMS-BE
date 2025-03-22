@@ -9,8 +9,9 @@ def get_courses(conn):
         course_type, 
         course_duration_hours, 
         course_duration_minutes,  
-        language, 
-        rating 
+        language,
+        rating ,
+        course_profile_image
     FROM lms.course_master
     """
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
@@ -28,6 +29,7 @@ def find_course_by_id(conn, user_id,course_id):
     c.course_level, 
     c.roles, 
     c.course_type,
+    course_profile_image,
     CASE 
         WHEN uce.user_id IS NOT NULL THEN true 
         ELSE false 
