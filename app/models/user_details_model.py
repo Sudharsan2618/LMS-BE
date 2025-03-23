@@ -140,29 +140,58 @@ GROUP BY
 
 
 def update_user_details(conn, data):
-    query = """
-    UPDATE lms.user_details
-    SET 
-        user_name = %(user_name)s,
-        age = %(age)s,
-        mobile_number = %(mobile_number)s,
-        mail_id = %(mail_id)s,
-        city = %(city)s,
-        area_of_interest = %(area_of_interest)s,
-        highest_qualification = %(highest_qualification)s,
-        year_of_passedout = %(year_of_passedout)s,
-        designation = %(designation)s,
-        ambition = %(ambition)s,
-        current_organization = %(current_organization)s,
-        job_title = %(job_title)s,
-        work_experience = %(work_experience)s,
-        linkedin_profile = %(linkedin_profile)s,
-        github_profile = %(github_profile)s,
-        portfolio_website = %(portfolio_website)s,
-        profile_picture_url = %(profile_picture_url)s
-    WHERE user_id = %(user_id)s
-    """
     with conn.cursor() as cursor:
-        cursor.execute(query, data)
+        # Step 1: Delete the existing user record
+        delete_query = """
+        DELETE FROM lms.user_details
+        WHERE user_id = %(user_id)s
+        """
+        cursor.execute(delete_query, {'user_id': data['user_id']})
+
+        # Step 2: Insert the new user record
+        insert_query = """
+        INSERT INTO lms.user_details (
+            user_id,
+            user_name,
+            age,
+            mobile_number,
+            mail_id,
+            city,
+            area_of_interest,
+            highest_qualification,
+            year_of_passedout,
+            designation,
+            ambition,
+            current_organization,
+            job_title,
+            work_experience,
+            linkedin_profile,
+            github_profile,
+            portfolio_website,
+            profile_picture_url
+        ) VALUES (
+            %(user_id)s,
+            %(user_name)s,
+            %(age)s,
+            %(mobile_number)s,
+            %(mail_id)s,
+            %(city)s,
+            %(area_of_interest)s,
+            %(highest_qualification)s,
+            %(year_of_passedout)s,
+            %(designation)s,
+            %(ambition)s,
+            %(current_organization)s,
+            %(job_title)s,
+            %(work_experience)s,
+            %(linkedin_profile)s,
+            %(github_profile)s,
+            %(portfolio_website)s,
+            %(profile_picture_url)s
+        )
+        """
+        cursor.execute(insert_query, data)
+
+        # Commit the transaction
         conn.commit()
         return cursor.rowcount > 0
