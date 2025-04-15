@@ -107,7 +107,7 @@ LEFT JOIN
 left join 
 	lms.initial_assessment_results as iar on iar.user_id = u.user_id
 WHERE 
-    u.user_id = 8
+    u.user_id = %s
 GROUP BY 
     u.user_id, 
     u.user_name, 
