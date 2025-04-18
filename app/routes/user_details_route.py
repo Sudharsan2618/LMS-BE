@@ -25,9 +25,11 @@ def get_user_details_api():
         if user_details:
             return jsonify({'user_details': user_details}), 200
         else:
-            return jsonify({'error': 'User details not found for the given User ID'}), 404
+            # Return the user_id if no user details are found
+            return jsonify({'user_id': user_id, 'message': 'No user details found for the given User ID'}), 200
     finally:
         conn.close()
+
 
 
 
