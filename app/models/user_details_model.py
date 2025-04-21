@@ -140,13 +140,21 @@ GROUP BY
 
 
 def update_user_details(conn, data):
+    fields = [
+        'user_id', 'user_name', 'age', 'mobile_number', 'mail_id', 'city',
+        'area_of_interest', 'highest_qualification', 'year_of_passedout',
+        'designation', 'ambition', 'current_organization', 'job_title',
+        'work_experience', 'linkedin_profile', 'github_profile', 'portfolio_website', 'profile_picture_url'
+    ]
+    # Fill missing fields with None
+    data_filled = {field: data.get(field, None) for field in fields}
     with conn.cursor() as cursor:
         # Step 1: Delete the existing user record
         delete_query = """
         DELETE FROM lms.user_details
         WHERE user_id = %(user_id)s
         """
-        cursor.execute(delete_query, {'user_id': data['user_id']})
+        cursor.execute(delete_query, {'user_id': data_filled['user_id']})
 
         # Step 2: Insert the new user record
         insert_query = """
@@ -190,14 +198,20 @@ def update_user_details(conn, data):
             %(profile_picture_url)s
         )
         """
-        cursor.execute(insert_query, data)
-
-        # Commit the transaction
+        cursor.execute(insert_query, data_filled)
         conn.commit()
         return cursor.rowcount > 0
 
 
 def insert_user_details(conn, data):
+    fields = [
+        'user_id', 'user_name', 'age', 'mobile_number', 'mail_id', 'city',
+        'area_of_interest', 'highest_qualification', 'year_of_passedout',
+        'designation', 'ambition', 'current_organization', 'job_title',
+        'work_experience', 'linkedin_profile', 'github_profile', 'portfolio_website', 'profile_picture_url'
+    ]
+    # Fill missing fields with None
+    data_filled = {field: data.get(field, None) for field in fields}
     with conn.cursor() as cursor:
         insert_query = """
         INSERT INTO lms.user_details (
@@ -240,6 +254,6 @@ def insert_user_details(conn, data):
             %(profile_picture_url)s
         )
         """
-        cursor.execute(insert_query, data)
+        cursor.execute(insert_query, data_filled)
         conn.commit()
         return cursor.rowcount > 0
