@@ -195,3 +195,51 @@ def update_user_details(conn, data):
         # Commit the transaction
         conn.commit()
         return cursor.rowcount > 0
+
+
+def insert_user_details(conn, data):
+    with conn.cursor() as cursor:
+        insert_query = """
+        INSERT INTO lms.user_details (
+            user_id,
+            user_name,
+            age,
+            mobile_number,
+            mail_id,
+            city,
+            area_of_interest,
+            highest_qualification,
+            year_of_passedout,
+            designation,
+            ambition,
+            current_organization,
+            job_title,
+            work_experience,
+            linkedin_profile,
+            github_profile,
+            portfolio_website,
+            profile_picture_url
+        ) VALUES (
+            %(user_id)s,
+            %(user_name)s,
+            %(age)s,
+            %(mobile_number)s,
+            %(mail_id)s,
+            %(city)s,
+            %(area_of_interest)s,
+            %(highest_qualification)s,
+            %(year_of_passedout)s,
+            %(designation)s,
+            %(ambition)s,
+            %(current_organization)s,
+            %(job_title)s,
+            %(work_experience)s,
+            %(linkedin_profile)s,
+            %(github_profile)s,
+            %(portfolio_website)s,
+            %(profile_picture_url)s
+        )
+        """
+        cursor.execute(insert_query, data)
+        conn.commit()
+        return cursor.rowcount > 0
