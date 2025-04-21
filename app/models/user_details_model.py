@@ -146,8 +146,8 @@ def update_user_details(conn, data):
         'designation', 'ambition', 'current_organization', 'job_title',
         'work_experience', 'linkedin_profile', 'github_profile', 'portfolio_website', 'profile_picture_url'
     ]
-    # Fill missing fields with None
-    data_filled = {field: data.get(field, None) for field in fields}
+    # Fill missing fields with None and convert empty strings to None
+    data_filled = {field: (data.get(field, None) if data.get(field, None) != '' else None) for field in fields}
     with conn.cursor() as cursor:
         # Step 1: Delete the existing user record
         delete_query = """
@@ -210,8 +210,8 @@ def insert_user_details(conn, data):
         'designation', 'ambition', 'current_organization', 'job_title',
         'work_experience', 'linkedin_profile', 'github_profile', 'portfolio_website', 'profile_picture_url'
     ]
-    # Fill missing fields with None
-    data_filled = {field: data.get(field, None) for field in fields}
+    # Fill missing fields with None and convert empty strings to None
+    data_filled = {field: (data.get(field, None) if data.get(field, None) != '' else None) for field in fields}
     with conn.cursor() as cursor:
         insert_query = """
         INSERT INTO lms.user_details (
