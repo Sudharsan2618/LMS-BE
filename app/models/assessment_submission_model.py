@@ -25,14 +25,19 @@ def submit_assessment_and_enroll_certificate(conn, user_id, course_id, answers):
                 VALUES (%s, %s)
             """, (certificate_id, user_id))
             
-            # Here you would typically also insert the assessment answers
-            # This is a placeholder - adjust according to your actual assessment table structure
-            for answer in answers:
-                cursor.execute("""
-                    INSERT INTO lms.course_assessment_responses
-                    (user_id, course_id, question_id, selected_option_id)
-                    VALUES (%s, %s, %s, %s)
-                """, (user_id, course_id, answer['question_id'], answer['selected_option_id']))
+            # Process assessment answers
+            if isinstance(answers, list):
+                for answer in answers:
+                    if isinstance(answer, dict):
+                        question_id = answer.get('question_id')
+                        selected_option_id = answer.get('selected_option_id')
+                        
+                        if question_id and selected_option_id:
+                            cursor.execute("""
+                                INSERT INTO lms.course_assessment_responses
+                                (user_id, course_id, question_id, selected_option_id)
+                                VALUES (%s, %s, %s, %s)
+                            """, (user_id, course_id, question_id, selected_option_id))
             
             # Commit transaction
             conn.commit()
