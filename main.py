@@ -14,6 +14,7 @@ from app.routes.user_details_route import userdetails_bp
 from app.routes.jobs_routes import jobs_bp
 from app.routes.assessment_submission_routes import assessment_submission_bp
 from app.routes.key_generation_routes import key_generation_bp
+from app.routes.course_routes import course_bp
 from flask import Flask
 from flask_cors import CORS
 
@@ -38,6 +39,7 @@ app.register_blueprint(userdetails_bp)
 app.register_blueprint(jobs_bp)
 app.register_blueprint(assessment_submission_bp)
 app.register_blueprint(key_generation_bp)
+app.register_blueprint(course_bp)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
