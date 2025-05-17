@@ -18,7 +18,18 @@ def find_admin_by_email(conn, email, password):
             admin['site'] = 'admin'
         return admin
 
-def create_user(conn, username, email, password):
+def update_unique_key_status(conn, unique_key):
+    update_query = "UPDATE lms.new_login SET used='yes' WHERE code=%s"
+    with conn.cursor() as cursor:
+        cursor.execute(update_query, (unique_key,))
+        conn.commit()
+        return cursor.rowcount > 0
+
+def create_user(conn, username, email, password, unique_key):
+    # First validate the unique key
+    if not validate_unique_key(conn, unique_key):
+        return {"error": "Invalid or already used unique key"}
+
     # Check if the email is already present
     check_email_query = "SELECT email FROM lms.users WHERE email = %s"
     insert_query = """
@@ -37,6 +48,10 @@ def create_user(conn, username, email, password):
         
         # If email does not exist, insert the new user
         cursor.execute(insert_query, (username, email, password))
+        
+        # Update the unique key status
+        update_unique_key_status(conn, unique_key)
+        
         conn.commit()
         return cursor.fetchone()
 

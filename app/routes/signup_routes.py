@@ -11,17 +11,18 @@ def signup():
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
+    unique_key = data.get('unique_key')
 
-    if not username or not email or not password:
-        return jsonify({'error': 'Username, email, and password are required'}), 400
+    if not username or not email or not password or not unique_key:
+        return jsonify({'error': 'Username, email, password, and unique key are required'}), 400
 
     conn = get_db_connection(DB_CONFIG)
     if not conn:
         return jsonify({'error': 'Database connection failed'}), 500
 
     try:
-        # Attempt to create the user
-        result = create_user(conn, username, email, password)
+        # Attempt to create the user with unique key
+        result = create_user(conn, username, email, password, unique_key)
         
         if "error" in result:  # Check if the result contains an error message
             return jsonify({'error': result['error']}), 409  # Conflict: Email already exists
