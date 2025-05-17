@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from bs4 import BeautifulSoup
 
 # Set ChromeDriver path
-chrome_driver_path = "C:/Users/SudharsanDhakshinamo/Downloads/chromedriver-win64/chromedriver-win64/chromedriver.exe"
+chrome_driver_path = "C:/Users/SudharsanDS/Downloads/chromedriver-win64/chromedriver-win64/chromedriver.exe"
 os.environ["CHROME_DRIVER_PATH"] = chrome_driver_path
 
 BASE_URL = "https://www.naukri.com"

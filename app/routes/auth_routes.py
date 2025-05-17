@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.utils.db_utils import get_db_connection
-from app.models.user_model import  find_user_by_email
+from app.models.user_model import  find_user_by_email, find_admin_by_email
 from app.config.database import DB_CONFIG
 
 auth_bp = Blueprint('auth', __name__)
@@ -20,11 +20,16 @@ def login_with_email():
         return jsonify({'error': 'Database connection failed'}), 500
 
     try:
+        # First check in users table
         user = find_user_by_email(conn, email, password)
-        print(user)
         if user:
             return jsonify({'message': 'Login successful', 'user': user}), 200
-        else:
-            return jsonify({'error': 'Invalid email or password'}), 401
+
+        # If not found in users, check in admin table
+        admin = find_admin_by_email(conn, email, password)
+        if admin:
+            return jsonify({'message': 'Login successful', 'user': admin}), 200
+
+        return jsonify({'error': 'Invalid email or password'}), 401
     finally:
         conn.close()

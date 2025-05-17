@@ -4,7 +4,19 @@ def find_user_by_email(conn, email, password):
     query = "SELECT user_id,username, initial_assessment FROM lms.users WHERE email = %s AND password = %s"
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute(query, (email, password))
-        return cursor.fetchone()
+        user = cursor.fetchone()
+        if user:
+            user['site'] = 'user'
+        return user
+
+def find_admin_by_email(conn, email, password):
+    query = "SELECT admin_id, name FROM lms.admin WHERE email = %s AND password = %s"
+    with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        cursor.execute(query, (email, password))
+        admin = cursor.fetchone()
+        if admin:
+            admin['site'] = 'admin'
+        return admin
 
 def create_user(conn, username, email, password):
     # Check if the email is already present
@@ -27,3 +39,10 @@ def create_user(conn, username, email, password):
         cursor.execute(insert_query, (username, email, password))
         conn.commit()
         return cursor.fetchone()
+
+def validate_unique_key(conn, unique_key):
+    query = "SELECT code FROM lms.new_login WHERE code = %s AND used = 'no'"
+    with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        cursor.execute(query, (unique_key,))
+        result = cursor.fetchone()
+        return bool(result)
