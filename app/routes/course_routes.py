@@ -5,7 +5,7 @@ from app.utils.db_utils import get_db_connection
 from app.models.course_model import create_course, create_course_enrollment, create_course_content
 from app.config.database import DB_CONFIG
 
-course_bp = Blueprint('course', __name__)
+course_bp = Blueprint('course_management', __name__)
 
 @course_bp.route('/api/courseMaster', methods=['POST'])
 def create_course_master():

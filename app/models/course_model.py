@@ -32,7 +32,7 @@ def create_course_enrollment(conn, enrollment_data):
         course_id, course_description, course_objective, 
         pre_requirments, course_level, roles, course_type)
     VALUES (%s, %s, %s, %s, %s, %s, %s)
-    RETURNING enrollment_id
+    RETURNING course_enrollment_id as enrollment_id
     """
     
     with conn.cursor(cursor_factory=RealDictCursor) as cursor:
