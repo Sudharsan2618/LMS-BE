@@ -18,6 +18,72 @@ def get_courses(conn):
         cursor.execute(query)
         return cursor.fetchall()  # Fetch all rows as dictionaries
 
+def get_user_courses_with_validity(conn, user_id):
+    query = """
+    SELECT 
+        cm.course_id, 
+        cm.course_name, 
+        cm.course_short_description, 
+        cm.course_type, 
+        cm.course_duration_hours, 
+        cm.course_duration_minutes,  
+        cm.language,
+        cm.rating,
+        cm.course_profile_image,
+        bc.validity,
+        bc.updated_date
+    FROM 
+        lms.users AS u
+    JOIN 
+        lms.batch_course AS bc
+        ON u.batch_id = bc.batch_id
+    JOIN 
+        lms.course_master AS cm
+        ON bc.course_id = cm.course_id
+    WHERE 
+        u.user_id = %s
+    """
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            print(f"Executing query for user_id: {user_id}")
+            cursor.execute(query, (user_id,))
+            
+            # Use fetchall() and convert to list of dictionaries
+            rows = cursor.fetchall()
+            if not rows:
+                print("No courses found")
+                return []
+                
+            # Convert each row to a dictionary and handle any potential None values
+            results = []
+            for row in rows:
+                if row is not None:
+                    row_dict = dict(row)
+                    # Ensure all fields have default values if None
+                    row_dict.update({
+                        'course_id': row_dict.get('course_id'),
+                        'course_name': row_dict.get('course_name', ''),
+                        'course_short_description': row_dict.get('course_short_description', ''),
+                        'course_type': row_dict.get('course_type', ''),
+                        'course_duration_hours': row_dict.get('course_duration_hours', 0),
+                        'course_duration_minutes': row_dict.get('course_duration_minutes', 0),
+                        'language': row_dict.get('language', ''),
+                        'rating': row_dict.get('rating', 0),
+                        'course_profile_image': row_dict.get('course_profile_image', ''),
+                        'validity': row_dict.get('validity', 0),
+                        'updated_date': str(row_dict.get('updated_date', ''))
+                    })
+                    results.append(row_dict)
+            
+            print(f"Found {len(results)} courses")
+            return results
+
+    except Exception as e:
+        print(f"Error in get_user_courses_with_validity: {str(e)}")
+        print(f"Query: {query}")
+        print(f"User ID: {user_id}")
+        return []
+        
 def find_course_by_id(conn, user_id,course_id):
     query = """
     SELECT 

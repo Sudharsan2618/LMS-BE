@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 from app.utils.db_utils import get_db_connection
 from app.config.database import DB_CONFIG
-from app.models.course_master_model import get_courses
-from app.models.course_master_model import find_course_by_id, enroll_user_in_course
+from app.models.course_master_model import get_courses, find_course_by_id, enroll_user_in_course, get_user_courses_with_validity
+from psycopg2.extras import RealDictCursor
 
 course_bp = Blueprint('course', __name__)
 
@@ -19,7 +19,55 @@ def fetch_courses():
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+@course_bp.route('/api/user-courses', methods=['GET'])
+def fetch_user_courses():
+    user_id = request.args.get('user_id')
+    
+    if not user_id:
+        return jsonify({'error': 'User ID is required'}), 400
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({'error': 'User ID must be a number'}), 400
+
+    conn = get_db_connection(DB_CONFIG)
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    cursor = None
+    try:
+        # Check if user exists
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT user_id, batch_id FROM lms.users WHERE user_id = %s", (user_id,))
+        user = cursor.fetchone()
         
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        if not user['batch_id']:
+            return jsonify({'error': 'User is not assigned to any batch'}), 404
+
+        # Get courses
+        courses = get_user_courses_with_validity(conn, user_id)
+        
+        if not courses:
+            return jsonify({
+                'courses': []
+            }), 200
+
+        return jsonify({
+            'courses': courses
+        }), 200
+
+    except Exception as e:
+        print(f"Error in fetch_user_courses: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        conn.close()
 
 courseenrollment_bp = Blueprint('courseenrollment', __name__)
 

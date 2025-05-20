@@ -19,11 +19,21 @@ def find_admin_by_email(conn, email, password):
         return admin
 
 def update_unique_key_status(conn, unique_key):
-    update_query = "UPDATE lms.new_login SET used='yes' WHERE code=%s"
+    # First get the batch_id and update the status
+    update_query = """
+    UPDATE lms.new_login 
+    SET used='yes' 
+    WHERE code=%s AND used='no'
+    RETURNING batch_id
+    """
     with conn.cursor() as cursor:
         cursor.execute(update_query, (unique_key,))
+        result = cursor.fetchone()
+        if not result or result[0] is None:
+            return None
+        batch_id = result[0]
         conn.commit()
-        return cursor.rowcount > 0
+        return batch_id
 
 def create_user(conn, username, email, password, unique_key):
     # First validate the unique key
@@ -48,12 +58,22 @@ def create_user(conn, username, email, password, unique_key):
         
         # If email does not exist, insert the new user
         cursor.execute(insert_query, (username, email, password))
+        new_user = cursor.fetchone()
         
-        # Update the unique key status
-        update_unique_key_status(conn, unique_key)
+        # Update the unique key status and get batch_id
+        batch_id = update_unique_key_status(conn, unique_key)
         
-        conn.commit()
-        return cursor.fetchone()
+        if batch_id:
+            # Update the user's batch_id
+            update_batch_query = """
+            UPDATE lms.users
+            SET batch_id = %s
+            WHERE user_id = %s
+            """
+            cursor.execute(update_batch_query, (batch_id, new_user['id']))
+            conn.commit()
+        
+        return new_user
 
 def validate_unique_key(conn, unique_key):
     query = "SELECT code FROM lms.new_login WHERE code = %s AND used = 'no'"
