@@ -47,7 +47,6 @@ def generate_keys():
         # Create CSV in memory
         si = io.StringIO()
         writer = csv.writer(si)
-        writer.writerow(['Key ID'])  # Header
         writer.writerows(generated_keys)
         
         # Create the response

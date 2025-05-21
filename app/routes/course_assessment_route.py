@@ -12,20 +12,40 @@ def check_answer():
     option_text = data.get('option_text')
 
     if not question_id or not option_text:
-        return jsonify({'error': 'Question ID and Option Text are required'}), 400
+        return jsonify({
+            'status': 'error',
+            'message': 'Question ID and Option Text are required'
+        }), 400
 
     conn = get_db_connection(DB_CONFIG)
     if not conn:
-        return jsonify({'error': 'Database connection failed'}), 500
+        return jsonify({
+            'status': 'error',
+            'message': 'Database connection failed'
+        }), 500
 
     try:
-        correct_answer = find_answer_by_question_id(conn, question_id)
-        if not correct_answer:
-            return jsonify({'error': 'Question ID not found'}), 404
+        question_data = find_answer_by_question_id(conn, question_id)
+        if not question_data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Question not found'
+            }), 404
 
-        if correct_answer['answer'].strip().lower() == option_text.strip().lower():
-            return jsonify({'result': 'Correct'}), 200
-        else:
-            return jsonify({'result': 'False'}), 200
+        # Compare the provided option text with the stored answer
+        is_correct = option_text.strip().lower() == question_data['answer'].strip().lower()
+        
+        return jsonify({
+            'status': 'success',
+            'is_correct': is_correct,
+            'question': question_data['question'],
+            'correct_answer': question_data['answer']
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
     finally:
         conn.close()
