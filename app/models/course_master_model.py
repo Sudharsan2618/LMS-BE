@@ -179,6 +179,7 @@ user_courses AS (
     initial_assessment,
     JSON_AGG(
       JSON_BUILD_OBJECT(
+        'course_id', course_id,
         'course_name', course_name,
         'enrollment_status', enrollment_status,
         'completion_status', completion_status,
