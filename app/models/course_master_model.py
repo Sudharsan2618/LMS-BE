@@ -127,3 +127,109 @@ def enroll_user_in_course(conn, user_id, course_id):
         cursor.execute(insert_query, (user_id, course_id))
         conn.commit()
         return cursor.fetchone()
+
+def get_batch_analytics_data(conn):
+    query = """
+WITH user_course_data AS (
+  SELECT 
+    u.user_id,
+    u.username,
+    u.batch_id,
+    b.batch_name,
+    u.initial_assessment,
+    cm.course_id,
+    cm.course_name,
+    CASE 
+      WHEN uce.user_id IS NOT NULL THEN 'Enrolled'
+      ELSE 'Not Enrolled' 
+    END AS enrollment_status,
+    CASE 
+      WHEN ce.certificate_id IS NOT NULL THEN 'Completed'
+      WHEN uce.user_id IS NOT NULL THEN 'In Progress'
+      ELSE 'Not Started'
+    END AS completion_status,
+    ce.certificate_id,
+    bc.validity,
+    bc.updated_date
+  FROM 
+    lms.users AS u
+  LEFT JOIN 
+    lms.batch AS b ON b.batch_id = u.batch_id
+  LEFT JOIN 
+    lms.batch_course AS bc ON bc.batch_id = u.batch_id
+  LEFT JOIN 
+    lms.course_master AS cm ON cm.course_id = bc.course_id
+  LEFT JOIN 
+    lms.user_course_enrollment AS uce ON uce.user_id = u.user_id AND uce.course_id = bc.course_id
+  LEFT JOIN 
+    lms.certificate_master AS cert_m ON cert_m.course_id = cm.course_id
+  LEFT JOIN 
+    lms.user_certicate_enrollment AS ce ON ce.certificate_id = cert_m.certificate_id AND ce.user_id = u.user_id
+  WHERE 
+    cm.course_id IS NOT NULL
+),
+
+-- Group courses by user to prevent duplicate user entries
+user_courses AS (
+  SELECT
+    user_id,
+    username,
+    batch_id,
+    batch_name,
+    initial_assessment,
+    JSON_AGG(
+      JSON_BUILD_OBJECT(
+        'course_name', course_name,
+        'enrollment_status', enrollment_status,
+        'completion_status', completion_status,
+        'certificate_id', certificate_id,
+        'validity', validity,
+        'updated_date', updated_date
+      )
+    ) AS courses
+  FROM 
+    user_course_data
+  GROUP BY
+    user_id, username, batch_id, batch_name, initial_assessment
+),
+
+batches_data AS (
+  SELECT 
+    uc.batch_id,
+    uc.batch_name,
+    JSON_AGG(
+      JSON_BUILD_OBJECT(
+        'username', uc.username,
+        'initial_assessment', uc.initial_assessment,
+        'courses', uc.courses
+      )
+    ) AS users_json
+  FROM 
+    user_courses uc
+  GROUP BY 
+    uc.batch_id, uc.batch_name
+)
+
+SELECT 
+  JSON_BUILD_OBJECT(
+    'total_users', (SELECT COUNT(*) FROM lms.users),
+    'total_batches', (SELECT COUNT(*) FROM lms.batch),
+    'total_courses', (SELECT COUNT(*) FROM lms.course_master),
+    'batches', 
+    (SELECT JSON_AGG(
+      JSON_BUILD_OBJECT(
+        'batch_id', batch_id,
+        'batch_name', batch_name,
+        'users', users_json
+      )
+    ) FROM batches_data)
+  ) AS result;
+  """
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()
+            return result['result'] if result else None
+    except Exception as e:
+        print(f"Error in get_batch_analytics_data: {str(e)}")
+        return None
