@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from app.models.course_master_model import get_batch_analytics_data
 from app.utils.db_utils import get_db_connection
 from app.config.database import DB_CONFIG
-from app.models.user_model import find_admin_by_email
+from app.models.user_model import find_admin_by_email, get_all_users
 from app.models.batch_model import create_login_key
 import csv
 import io
@@ -158,4 +158,30 @@ def extend_validity():
         return jsonify({
             'status': 'error',
             'message': str(e)
-        }), 500 
+        }), 500
+
+@admin_bp.route('/api/admin/users', methods=['GET'])
+def get_users():
+    try:
+        conn = get_db_connection(DB_CONFIG)
+        if conn is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to connect to database'
+            }), 500
+            
+        users = get_all_users(conn)
+        
+        return jsonify({
+            'status': 'success',
+            'data': users
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+    finally:
+        if 'conn' in locals():
+            conn.close() 

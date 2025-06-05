@@ -20,28 +20,55 @@ def get_courses(conn):
 
 def get_user_courses_with_validity(conn, user_id):
     query = """
+SELECT 
+    cm.course_id, 
+    cm.course_name, 
+    cm.course_short_description, 
+    cm.course_type, 
+    cm.course_duration_hours, 
+    cm.course_duration_minutes,  
+    cm.language,
+    cm.rating,
+    cm.course_profile_image,
+    MAX(combined.validity) AS final_validity, 
+    MAX(combined.updated_date) AS final_updated_date
+FROM 
+    lms.users AS u
+LEFT JOIN (
     SELECT 
-        cm.course_id, 
-        cm.course_name, 
-        cm.course_short_description, 
-        cm.course_type, 
-        cm.course_duration_hours, 
-        cm.course_duration_minutes,  
-        cm.language,
-        cm.rating,
-        cm.course_profile_image,
+        bc.course_id,
         bc.validity,
-        bc.updated_date
+        bc.updated_date,
+        u.user_id
     FROM 
-        lms.users AS u
-    JOIN 
         lms.batch_course AS bc
-        ON u.batch_id = bc.batch_id
     JOIN 
-        lms.course_master AS cm
-        ON bc.course_id = cm.course_id
-    WHERE 
-        u.user_id = %s
+        lms.users AS u ON u.batch_id = bc.batch_id
+    UNION ALL
+    SELECT 
+        qcuc.course_id,
+        qcuc.validity,
+        qcuc.updated_date,
+        qcuc.user_id
+    FROM 
+        lms.qc_user_course AS qcuc
+) AS combined
+ON u.user_id = combined.user_id
+JOIN 
+    lms.course_master AS cm
+ON combined.course_id = cm.course_id
+WHERE 
+    u.user_id = %s
+GROUP BY 
+    cm.course_id, 
+    cm.course_name, 
+    cm.course_short_description, 
+    cm.course_type, 
+    cm.course_duration_hours, 
+    cm.course_duration_minutes,  
+    cm.language,
+    cm.rating,
+    cm.course_profile_image;
     """
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cursor:
@@ -70,8 +97,8 @@ def get_user_courses_with_validity(conn, user_id):
                         'language': row_dict.get('language', ''),
                         'rating': row_dict.get('rating', 0),
                         'course_profile_image': row_dict.get('course_profile_image', ''),
-                        'validity': row_dict.get('validity', 0),
-                        'updated_date': str(row_dict.get('updated_date', ''))
+                        'validity': row_dict.get('final_validity', 0),
+                        'updated_date': str(row_dict.get('final_updated_date', ''))
                     })
                     results.append(row_dict)
             

@@ -81,3 +81,10 @@ def validate_unique_key(conn, unique_key):
         cursor.execute(query, (unique_key,))
         result = cursor.fetchone()
         return bool(result)
+
+def get_all_users(conn):
+    query = "SELECT user_id, username FROM lms.users ORDER BY username ASC"
+    with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        cursor.execute(query)
+        users = cursor.fetchall()
+        return users
