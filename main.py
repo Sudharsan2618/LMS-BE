@@ -17,11 +17,13 @@ from app.routes.key_generation_routes import key_generation_bp
 from app.routes.course_routes import course_bp as course_management_bp
 from app.routes.admin_routes import admin_bp
 from app.routes.qc_batch_routes import qc_batch_bp
+from app.routes.ai_route import ai_bp
 from flask import Flask
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["https://www.companion-lms.com"])
+# CORS(app, origins=["https://www.companion-lms.com"])
+CORS(app, origins=["http://localhost:3000"])
 
 # Register blueprints
 app.register_blueprint(auth_bp)
@@ -44,6 +46,7 @@ app.register_blueprint(key_generation_bp)
 app.register_blueprint(course_management_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(qc_batch_bp)
+app.register_blueprint(ai_bp)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

@@ -62,7 +62,7 @@ def create_course_content(conn, course_contents):
         course_subtitle_id, course_subtitle, subtitle_content,
         subtitle_code, subtitle_help_text, helpfull_links)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    RETURNING content_id
+    RETURNING course_content_id
     """
     
     inserted_ids = []
@@ -109,7 +109,7 @@ def create_course_content(conn, course_contents):
                 ))
                 
                 result = cursor.fetchone()
-                inserted_ids.append(result['content_id'])
+                inserted_ids.append(result['course_content_id'])
                 
             except Exception as e:
                 errors.append({
