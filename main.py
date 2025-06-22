@@ -18,6 +18,8 @@ from app.routes.course_routes import course_bp as course_management_bp
 from app.routes.admin_routes import admin_bp
 from app.routes.qc_batch_routes import qc_batch_bp
 from app.routes.ai_route import ai_bp
+from app.routes.content_generate_route import content_generate_bp
+from app.routes.transaction_view_route import transaction_view_bp
 from flask import Flask
 from flask_cors import CORS
 
@@ -47,6 +49,8 @@ app.register_blueprint(course_management_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(qc_batch_bp)
 app.register_blueprint(ai_bp)
+app.register_blueprint(content_generate_bp)
+app.register_blueprint(transaction_view_bp)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
