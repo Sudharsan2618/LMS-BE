@@ -91,28 +91,45 @@ def insert_course_content(conn, course_content_data):
                 print(f"Failed to create course_content table: {str(create_error)}")
                 raise
 
-def update_content_progress(conn, course_id, task_id, status):
+def update_content_progress(conn, course_id, task_id, status, q_status=None):
     """
-    Update or insert content generation progress
+    Update or insert content generation progress, including q_status
     """
     # First try to update existing record
-    update_query = """
-    UPDATE lms.course_content_progress 
-    SET status = %s, updated_date = CURRENT_TIMESTAMP
-    WHERE course_id = %s AND task_id = %s
-    """
+    if q_status is not None:
+        update_query = """
+        UPDATE lms.course_content_progress 
+        SET status = %s, q_status = %s, updated_date = CURRENT_TIMESTAMP
+        WHERE course_id = %s AND task_id = %s
+        """
+    else:
+        update_query = """
+        UPDATE lms.course_content_progress 
+        SET status = %s, updated_date = CURRENT_TIMESTAMP
+        WHERE course_id = %s AND task_id = %s
+        """
     
     with conn.cursor() as cursor:
         try:
-            cursor.execute(update_query, (status, course_id, task_id))
+            if q_status is not None:
+                cursor.execute(update_query, (status, q_status, course_id, task_id))
+            else:
+                cursor.execute(update_query, (status, course_id, task_id))
             
             # If no rows were updated, insert new record
             if cursor.rowcount == 0:
-                insert_query = """
-                INSERT INTO lms.course_content_progress(course_id, task_id, status, updated_date)
-                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
-                """
-                cursor.execute(insert_query, (course_id, task_id, status))
+                if q_status is not None:
+                    insert_query = """
+                    INSERT INTO lms.course_content_progress(course_id, task_id, status, q_status, updated_date)
+                    VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    """
+                    cursor.execute(insert_query, (course_id, task_id, status, q_status))
+                else:
+                    insert_query = """
+                    INSERT INTO lms.course_content_progress(course_id, task_id, status, updated_date)
+                    VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+                    """
+                    cursor.execute(insert_query, (course_id, task_id, status))
             
             conn.commit()
         except Exception as e:
@@ -126,6 +143,7 @@ def update_content_progress(conn, course_id, task_id, status):
                     course_id integer NOT NULL,
                     task_id character varying(100) NOT NULL,
                     status character varying(50) NOT NULL,
+                    q_status character varying(50),
                     updated_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );
                 """
@@ -133,11 +151,18 @@ def update_content_progress(conn, course_id, task_id, status):
                 conn.commit()
                 
                 # Retry the insert
-                insert_query = """
-                INSERT INTO lms.course_content_progress(course_id, task_id, status, updated_date)
-                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
-                """
-                cursor.execute(insert_query, (course_id, task_id, status))
+                if q_status is not None:
+                    insert_query = """
+                    INSERT INTO lms.course_content_progress(course_id, task_id, status, q_status, updated_date)
+                    VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    """
+                    cursor.execute(insert_query, (course_id, task_id, status, q_status))
+                else:
+                    insert_query = """
+                    INSERT INTO lms.course_content_progress(course_id, task_id, status, updated_date)
+                    VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+                    """
+                    cursor.execute(insert_query, (course_id, task_id, status))
                 conn.commit()
             except Exception as create_error:
                 print(f"Failed to create table: {str(create_error)}")
@@ -173,7 +198,7 @@ def stream_gemini_response(response):
 
 def clean_json_response(response_text):
     """
-    Clean and fix common JSON response issues from AI models
+    Clean and fix common JSON response issues from AI models, robustly handle arrays and code block markers
     """
     if not response_text:
         return None
@@ -184,48 +209,39 @@ def clean_json_response(response_text):
         text = text[7:]
     elif text.startswith('```'):
         text = text[3:]
-    
     if text.endswith('```'):
         text = text[:-3]
-    
     text = text.strip()
     
-    # Find JSON object boundaries
-    start_idx = text.find('{')
-    end_idx = text.rfind('}')
-    
-    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-        text = text[start_idx:end_idx + 1]
-    
-    # Multiple attempts to fix JSON issues
-    attempts = [
-        # Attempt 1: Try as-is
-        lambda t: json.loads(t),
-        
-        # Attempt 2: Fix common escape sequences
-        lambda t: json.loads(t.replace('\\"', '"').replace('\\n', ' ').replace('\\t', ' ').replace('\\r', ' ')),
-        
-        # Attempt 3: Remove all problematic characters
-        lambda t: json.loads(t.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ').replace('\\', '')),
-        
-        # Attempt 4: Try to fix unescaped quotes by escaping them properly
-        lambda t: json.loads(t.replace('"', '\\"').replace('\\"\\"', '\\"')),
-        
-        # Attempt 5: Use regex to find and fix JSON structure
-        lambda t: json.loads(re.sub(r'[^\x20-\x7E]', ' ', t))
-    ]
-    
-    for i, attempt in enumerate(attempts):
+    # Try to find a JSON array in the text
+    array_start = text.find('[')
+    array_end = text.rfind(']')
+    if array_start != -1 and array_end != -1 and array_end > array_start:
+        array_str = text[array_start:array_end+1]
         try:
-            return attempt(text)
-        except (json.JSONDecodeError, Exception) as e:
-            if i == len(attempts) - 1:  # Last attempt
-                print(f"All JSON parsing attempts failed: {str(e)}")
-                print(f"Original text: {response_text[:500]}...")
-                return None
-            continue
+            return json.loads(array_str)
+        except Exception as e:
+            print(f"Failed to parse JSON array: {e}")
+            print(f"Array string: {array_str[:500]}...")
     
-    return None
+    # If not an array, try to find a JSON object
+    obj_start = text.find('{')
+    obj_end = text.rfind('}')
+    if obj_start != -1 and obj_end != -1 and obj_end > obj_start:
+        obj_str = text[obj_start:obj_end+1]
+        try:
+            return json.loads(obj_str)
+        except Exception as e:
+            print(f"Failed to parse JSON object: {e}")
+            print(f"Object string: {obj_str[:500]}...")
+    
+    # Last resort: try to remove newlines and parse
+    try:
+        return json.loads(text.replace('\n', ' ').replace('\r', ' '))
+    except Exception as e:
+        print(f"All JSON parsing attempts failed: {e}")
+        print(f"Original text: {response_text[:500]}...")
+        return None
 
 def generate_subtitle_content_fallback(master_title, subtitle, course_name=None):
     """
@@ -354,6 +370,49 @@ Guidelines for content generation:
         # Try fallback method
         return generate_subtitle_content_fallback(master_title, subtitle, course_name)
 
+def call_insert_course_assessment(conn, course_id, question, answer, answer_id, question_sequenceid, options):
+    """
+    Call the insert_course_assessment stored procedure with question_sequenceid
+    """
+    with conn.cursor() as cursor:
+        cursor.execute(
+            "CALL insert_course_assessment(%s, %s, %s, %s, %s, %s)",
+            (course_id, question, answer, answer_id, question_sequenceid, options)
+        )
+        conn.commit()
+
+def generate_questions_for_content(content_list, course_name):
+    """
+    Generate 10 contextual and 10 company questions with 4 options each
+    Returns a list of dicts: {question, answer, answer_id, options}
+    """
+    questions = []
+    # 10 contextual questions
+    context = '\n'.join([item.get('subtitle_content', '') for item in content_list if item.get('subtitle_content')])
+    prompt_contextual = f"""Based on the following course content for '{course_name}', generate 10 high-standard multiple-choice questions. Each question should have 4 options, and specify the correct answer and its index (1-based). Return as JSON array with fields: question, options (array), answer, answer_id (1-4).\n\nContent:\n{context}\n\nFormat:\n[{{'question': '...', 'options': ['A', 'B', 'C', 'D'], 'answer': '...', 'answer_id': 2}}, ...]"""
+    
+    # 10 company questions
+    prompt_company = f"""Generate 10 high-standard multiple-choice questions that are most commonly asked by companies for '{course_name}'. Each question should have 4 options, and specify the correct answer and its index (1-based). Return as JSON array with fields: question, options (array), answer, answer_id (1-4).\n\nFormat:\n[{{'question': '...', 'options': ['A', 'B', 'C', 'D'], 'answer': '...', 'answer_id': 2}}, ...]"""
+    
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Contextual questions
+    resp1 = model.generate_content(prompt_contextual)
+    try:
+        q1 = clean_json_response(resp1.text)
+        if isinstance(q1, list):
+            questions.extend(q1)
+    except Exception as e:
+        print(f"Error parsing contextual questions: {e}")
+    # Company questions
+    resp2 = model.generate_content(prompt_company)
+    try:
+        q2 = clean_json_response(resp2.text)
+        if isinstance(q2, list):
+            questions.extend(q2)
+    except Exception as e:
+        print(f"Error parsing company questions: {e}")
+    return questions[:20]  # Ensure max 20
+
 def process_course_content_background(task_id, course_data, course_name=None, course_id=None):
     """
     Background function to process course content generation and store in database
@@ -459,12 +518,38 @@ def process_course_content_background(task_id, course_data, course_name=None, co
             
             master_title_id += 1  # Increment master title ID
         
-        # Mark as completed
+        # Mark as completed for content
         result["status"] = "completed"
         background_tasks[task_id] = result
         
         # Update final status in database
         update_content_progress(conn, course_id, task_id, "completed")
+        
+        # --- Question Generation ---
+        # Set q_status to processing
+        update_content_progress(conn, course_id, task_id, "completed", q_status="processing")
+        
+        # Generate questions
+        questions = generate_questions_for_content(result["data"], course_name)
+        print(f"Generated {len(questions)} questions for course_id {course_id}")
+        
+        # Store questions using the stored procedure
+        for idx, q in enumerate(questions, start=1):
+            try:
+                call_insert_course_assessment(
+                    conn,
+                    course_id,
+                    q.get('question'),
+                    q.get('answer'),
+                    q.get('answer_id'),
+                    idx,  # question_sequenceid (1-20)
+                    q.get('options')
+                )
+            except Exception as e:
+                print(f"Error storing question: {q.get('question')}, error: {e}")
+        
+        # Set q_status to completed
+        update_content_progress(conn, course_id, task_id, "completed", q_status="completed")
         
     except Exception as e:
         result = {
