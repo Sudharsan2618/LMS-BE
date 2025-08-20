@@ -43,3 +43,7 @@ coverage.xml
 
 # Local development settings
 local_settings.py
+
+# Temporary files
+temp_files/
+
