@@ -50,81 +50,83 @@ def main():
     check_aws_credentials()
     print("-" * 45)
     
-    # Test configuration
-    course_id = 1
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_file = f"enhanced_course_{course_id}_presentation_{timestamp}.pptx"
+    # Test configuration: run for multiple course IDs
+    course_ids = [2, 3, 4, 5, 7, 8, 9, 10]
     
-    # Create output directory
+    # Create output directory once
     os.makedirs("generated_presentations", exist_ok=True)
-    output_path = os.path.join("generated_presentations", output_file)
     
-    print(f"📋 Course ID: {course_id}")
-    print(f"📄 Output file: {output_path}")
-    print(f"📁 Template: Using professional LMS template")
-    print(f"📊 Max slides: 30 (enhanced from 20)")
-    print("-" * 45)
-    
-    try:
-        print("🚀 Starting enhanced PPT generation...")
+    for course_id in course_ids:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        output_file = f"enhanced_course_{course_id}_presentation_{timestamp}.pptx"
+        output_path = os.path.join("generated_presentations", output_file)
         
-        # Call the enhanced function with S3 upload
-        result = generate_ppt_for_course(
-            course_id=course_id,
-            filename=f"enhanced_course_{course_id}_presentation_{timestamp}",
-            template_path=None,  # Use default template
-            max_slides=30,  # Increased slide count
-            upload_to_cloud=True  # Enable S3 upload
-        )
+        print(f"📋 Course ID: {course_id}")
+        print(f"📄 Output file: {output_path}")
+        print(f"📁 Template: Using professional LMS template")
+        print(f"📊 Max slides: 30 (enhanced from 20)")
+        print("-" * 45)
         
-        print("✅ Enhanced PPT generation completed!")
-        print(f"📄 Generated file: {result['filename']}")
-        
-        # Check results
-        local_path = result['local_path']
-        
-        # Show S3 URL if uploaded
-        if result['cloud_url']:
-            print(f"☁️  S3 URL: {result['cloud_url']}")
-            print("🌐 PPT is now publicly accessible via the S3 URL!")
+        try:
+            print("🚀 Starting enhanced PPT generation...")
             
-            if local_path is None:
-                print("💾 Local file: Cleaned up after S3 upload")
+            # Call the enhanced function with S3 upload
+            result = generate_ppt_for_course(
+                course_id=course_id,
+                filename=f"enhanced_course_{course_id}_presentation_{timestamp}",
+                template_path=None,  # Use default template
+                max_slides=30,  # Increased slide count
+                upload_to_cloud=True  # Enable S3 upload
+            )
+            
+            print("✅ Enhanced PPT generation completed!")
+            print(f"📄 Generated file: {result['filename']}")
+            
+            # Check results
+            local_path = result['local_path']
+            
+            # Show S3 URL if uploaded
+            if result['cloud_url']:
+                print(f"☁️  S3 URL: {result['cloud_url']}")
+                print("🌐 PPT is now publicly accessible via the S3 URL!")
+                
+                if local_path is None:
+                    print("💾 Local file: Cleaned up after S3 upload")
+                else:
+                    print(f"💾 Local path: {local_path}")
+                    if os.path.exists(local_path):
+                        file_size = os.path.getsize(local_path)
+                        print(f"📊 File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
             else:
-                print(f"💾 Local path: {local_path}")
-                if os.path.exists(local_path):
+                print("⚠️  S3 upload was skipped or failed")
+                if local_path and os.path.exists(local_path):
                     file_size = os.path.getsize(local_path)
                     print(f"📊 File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
-        else:
-            print("⚠️  S3 upload was skipped or failed")
-            if local_path and os.path.exists(local_path):
-                file_size = os.path.getsize(local_path)
-                print(f"📊 File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
-                print(f"💾 Local path: {local_path}")
-            else:
-                print("❌ No file was created!")
-                return
-        
-        print("\n🎉 SUCCESS! Enhanced PowerPoint with richer content generated!")
-        print("\n📋 Enhanced features include:")
-        print("   • Course overview slide")
-        print("   • Module header slides with learning objectives")
-        print("   • Detailed content with emojis and formatting")
-        print("   • Code examples and tips")
-        print("   • Resource links")
-        print("   • Professional styling")
-        print("   • AWS S3 cloud storage integration")
-        print("   • Automatic database update with PPT URL")
+                    print(f"💾 Local path: {local_path}")
+                else:
+                    print("❌ No file was created!")
             
-    except Exception as e:
-        print(f"❌ Error during enhanced PPT generation:")
-        print(f"   Error type: {type(e).__name__}")
-        print(f"   Error message: {str(e)}")
+            print("\n🎉 SUCCESS! Enhanced PowerPoint with richer content generated!")
+            print("\n📋 Enhanced features include:")
+            print("   • Course overview slide")
+            print("   • Module header slides with learning objectives")
+            print("   • Detailed content with emojis and formatting")
+            print("   • Code examples and tips")
+            print("   • Resource links")
+            print("   • Professional styling")
+            print("   • AWS S3 cloud storage integration")
+            print("   • Automatic database update with PPT URL")
+        except Exception as e:
+            print(f"❌ Error during enhanced PPT generation for course_id {course_id}:")
+            print(f"   Error type: {type(e).__name__}")
+            print(f"   Error message: {str(e)}")
+            
+            # Show traceback for debugging
+            import traceback
+            print("\n📋 Full traceback:")
+            traceback.print_exc()
         
-        # Show traceback for debugging
-        import traceback
-        print("\n📋 Full traceback:")
-        traceback.print_exc()
+        print("\n" + "=" * 60 + "\n")
 
 if __name__ == "__main__":
     main()
