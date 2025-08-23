@@ -1,0 +1,44 @@
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.build/
+.eggs/
+.dist/
+
+# Environments
+.venv/
+venv/
+ENV/
+
+# VCS
+.git/
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node/npm leftovers
+node_modules/
+package-lock.json
+
+# Local files not needed in image
+*.log
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Large generated assets you don't want baked into the image
+# generated_presentations/
+# uploads/

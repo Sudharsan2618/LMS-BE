@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: lms-be
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      # Fallbacks if not provided in .env
+      - PORT=5000
+      - FLASK_ENV=production
+    restart: unless-stopped
+    # If you need to write files (e.g., generated_presentations), mount a volume
+    # volumes:
+    #   - ./generated_presentations:/app/generated_presentations
+
+# Optional: Add a Postgres service if you want local DB instead of a remote one
+#  db:
+#    image: postgres:16
+#    container_name: lms-postgres
+#    environment:
+#      - POSTGRES_DB=${DB_NAME:-LMS}
+#      - POSTGRES_USER=${DB_USER:-postgres}
+#      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+#
+# volumes:
+#   pgdata:
