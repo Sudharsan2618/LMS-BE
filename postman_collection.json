@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "LMS-BE API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for all LMS-BE routes. Set environment variable base_url (e.g., http://localhost:5000)."
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/api/login", "host": ["{{base_url}}"], "path": ["api","login"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"secret\"\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Signup",
+      "item": [
+        {
+          "name": "Sign Up",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/api/signup", "host": ["{{base_url}}"], "path": ["api","signup"]},
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"john\",\n  \"email\": \"john@example.com\",\n  \"password\": \"secret\",\n  \"unique_key\": \"KEY123\"\n}"}
+          }
+        },
+        {
+          "name": "Validate Key",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/api/validate-key", "host": ["{{base_url}}"], "path": ["api","validate-key"]},
+            "body": {"mode": "raw", "raw": "{\n  \"unique_key\": \"KEY123\"\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Initial Assessment",
+      "item": [
+        {
+          "name": "Get Questions by Tab",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/api/initial_assessment_questions", "host": ["{{base_url}}"], "path": ["api","initial_assessment_questions"]},
+            "body": {"mode": "raw", "raw": "{\n  \"tab_id\": 1,\n  \"user_id\": 1\n}"}
+          }
+        },
+        {
+          "name": "Submit Response",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/api/initial_assessment_response", "host": ["{{base_url}}"], "path": ["api","initial_assessment_response"]},
+            "body": {"mode": "raw", "raw": "{\n  \"user_id\": 1,\n  \"question_id\": 10,\n  \"selected_option_id\": 2,\n  \"tab_id\": 1\n}"}
+          }
+        },
+        {
+          "name": "User Initial Assessment Details",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/api/user-initial-assessment-details", "host": ["{{base_url}}"], "path": ["api","user-initial-assessment-details"]},
+            "body": {"mode": "raw", "raw": "{\n  \"user_id\": 1\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Home & Ebooks",
+      "item": [
+        {"name": "Home Headers", "request": {"method": "GET", "url": {"raw": "{{base_url}}/api/home-headers", "host": ["{{base_url}}"], "path": ["api","home-headers"]}}},
+        {"name": "Ebooks", "request": {"method": "GET", "url": {"raw": "{{base_url}}/api/ebooks", "host": ["{{base_url}}"], "path": ["api","ebooks"]}}}
+      ]
+    },
+    {
+      "name": "Courses (Master/User)",
+      "item": [
+        {"name": "List Courses", "request": {"method": "GET", "url": {"raw": "{{base_url}}/api/course-master", "host": ["{{base_url}}"], "path": ["api","course-master"]}}},
+        {"name": "User Courses", "request": {"method": "GET", "url": {"raw": "{{base_url}}/api/user-courses?user_id=1", "host": ["{{base_url}}"], "path": ["api","user-courses"], "query": [{"key":"user_id","value":"1"}]}}}
+      ]
+    },
+    {
+      "name": "Enrollment",
+      "item": [
+        {"name": "Course Enrollment Details", "request": {"method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": {"raw": "{{base_url}}/api/course/enrollment_details", "host": ["{{base_url}}"], "path": ["api","course","enrollment_details"]}, "body": {"mode":"raw","raw":"{\n  \"course_id\": 1,\n  \"user_id\": 1\n}"}}},
+        {"name": "User Enroll in Course", "request": {"method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": {"raw": "{{base_url}}/api/course/user_enroll", "host": ["{{base_url}}"], "path": ["api","course","user_enroll"]}, "body": {"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"course_id\": 1\n}"}}}
+      ]
+    },
+    {
+      "name": "Course Content",
+      "item": [
+        {"name": "Fetch Course Content", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/course-content","host":["{{base_url}}"],"path":["api","course-content"]},"body":{"mode":"raw","raw":"{\n  \"course_id\": 1,\n  \"user_id\": 1\n}"}}},
+        {"name": "Update/Insert Progress", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/course-progress","host":["{{base_url}}"],"path":["api","course-progress"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"course_id\": 1,\n  \"course_subtitle_id\": 1,\n  \"course_mastertitle_breakdown_id\": 1,\n  \"course_subtitle_progress\": 50\n}"}}},
+        {"name": "User Course Status", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/userCourseStatus","host":["{{base_url}}"],"path":["api","userCourseStatus"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"course_id\": 1\n}"}}}
+      ]
+    },
+    {
+      "name": "Course Assessment",
+      "item": [
+        {"name": "Check Answer", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/check_answer","host":["{{base_url}}"],"path":["api","check_answer"]},"body":{"mode":"raw","raw":"{\n  \"question_id\": 1,\n  \"option_id\": 2,\n  \"option_text\": \"Some option\"\n}"}}}
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {"name": "Batch Analytics", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/admin/batch-analytics","host":["{{base_url}}"],"path":["api","admin","batch-analytics"]}}},
+        {"name": "Generate User Keys (CSV)", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/admin/generate-user-keys","host":["{{base_url}}"],"path":["api","admin","generate-user-keys"]},"body":{"mode":"raw","raw":"{\n  \"batch_id\": 1,\n  \"num_users\": 10\n}"}}},
+        {"name": "Extend Validity (Admin)", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/admin/extend-validity","host":["{{base_url}}"],"path":["api","admin","extend-validity"]},"body":{"mode":"raw","raw":"{\n  \"batch_id\": 1,\n  \"course_id\": 1,\n  \"validity_days\": 30\n}"}}},
+        {"name": "List Users", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/admin/users","host":["{{base_url}}"],"path":["api","admin","users"]}}}
+      ]
+    },
+    {
+      "name": "QC Batch",
+      "item": [
+        {"name": "Create QC Batch", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/qc-batch/create","host":["{{base_url}}"],"path":["api","qc-batch","create"]},"body":{"mode":"raw","raw":"{\n  \"batch_name\": \"QC-2025-01\",\n  \"user_courses\": [\n    { \"user_id\": 1, \"courses\": [ { \"course_id\": 1, \"validity_days\": 30 } ] }\n  ]\n}"}}},
+        {"name": "Analytics", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/qc-batch/analytics","host":["{{base_url}}"],"path":["api","qc-batch","analytics"]}}},
+        {"name": "Add Course to User", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/qc-batch/add-course","host":["{{base_url}}"],"path":["api","qc-batch","add-course"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"course_id\": 1,\n  \"validity_days\": 45\n}"}}},
+        {"name": "Extend Validity (User)", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/qc-batch/extend-validity","host":["{{base_url}}"],"path":["api","qc-batch","extend-validity"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"course_id\": 1,\n  \"validity_days\": 60\n}"}}},
+        {"name": "Detailed Analytics", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/qc-batch/detailed-analytics","host":["{{base_url}}"],"path":["api","qc-batch","detailed-analytics"]}}}
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {"name": "Jobs by User Courses", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/jobs/:user_id","host":["{{base_url}}"],"path":["api","jobs",":user_id"],"variable":[{"key":"user_id","value":"1"}]}}}
+      ]
+    },
+    {
+      "name": "Key Generation",
+      "item": [
+        {"name": "Generate Keys + Create Batch + Associate Courses", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/generate-keys","host":["{{base_url}}"],"path":["api","generate-keys"]},"body":{"mode":"raw","raw":"{\n  \"num_users\": 5,\n  \"batch_name\": \"Batch A\",\n  \"course_ids\": [1,2],\n  \"validity_days\": 30\n}"}}}
+      ]
+    },
+    {
+      "name": "Course Management (Create/Upload)",
+      "item": [
+        {"name": "Create Course Master", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/courseMaster","host":["{{base_url}}"],"path":["api","courseMaster"]},"body":{"mode":"raw","raw":"{\n  \"course_name\": \"DSA\",\n  \"course_short_description\": \"Basics\",\n  \"course_type\": \"tech\",\n  \"course_duration_hours\": 10,\n  \"course_duration_minutes\": 0,\n  \"language\": \"EN\",\n  \"rating\": 5,\n  \"course_profile_image\": \"url\"\n}"}}},
+        {"name": "Create Course Enrollment Details", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/courseEnrollment","host":["{{base_url}}"],"path":["api","courseEnrollment"]},"body":{"mode":"raw","raw":"{\n  \"course_id\": 1,\n  \"course_description\": \"...\",\n  \"course_objective\": \"...\",\n  \"pre_requirments\": \"...\",\n  \"course_level\": \"Beginner\",\n  \"roles\": \"...\",\n  \"course_type\": \"tech\"\n}"}}},
+        {"name": "Upload Course Content (Excel)", "request": {"method":"POST","url":{"raw":"{{base_url}}/api/courseContent/upload","host":["{{base_url}}"],"path":["api","courseContent","upload"]},"body":{"mode":"formdata","formdata":[{"key":"file","type":"file","src":["path/to/file.xlsx"]}]}}
+        }
+      ]
+    },
+    {
+      "name": "Transaction View",
+      "item": [
+        {"name": "Course Content by Course ID", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/transaction-view/course-content/:course_id","host":["{{base_url}}"],"path":["api","transaction-view","course-content",":course_id"],"variable":[{"key":"course_id","value":"1"}]}}},
+        {"name": "Questions by Course ID", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/transaction-view/questions/:course_id","host":["{{base_url}}"],"path":["api","transaction-view","questions",":course_id"],"variable":[{"key":"course_id","value":"1"}]}}},
+        {"name": "Approve Course + Generate PPT", "request": {"method":"POST","url":{"raw":"{{base_url}}/api/transaction-view/approve-course/:course_id","host":["{{base_url}}"],"path":["api","transaction-view","approve-course",":course_id"],"variable":[{"key":"course_id","value":"1"}]}}}
+      ]
+    },
+    {
+      "name": "PPT URL",
+      "item": [
+        {"name": "Get Course PPT URL", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/course-ppt-url/:course_id","host":["{{base_url}}"],"path":["api","course-ppt-url",":course_id"],"variable":[{"key":"course_id","value":"1"}]}}}
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {"name": "Ask AI (stream)", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/ai/ask","host":["{{base_url}}"],"path":["api","ai","ask"]},"body":{"mode":"raw","raw":"{\n  \"question\": \"How to learn Python?\"\n}"}}},
+        {"name": "AI Health", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/ai/health","host":["{{base_url}}"],"path":["api","ai","health"]}}},
+        {"name": "AI Test Gemini", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/ai/test-gemini","host":["{{base_url}}"],"path":["api","ai","test-gemini"]}}}
+      ]
+    },
+    {
+      "name": "Content Generate",
+      "item": [
+        {"name": "Generate Syllabus (SSE)", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/content-generate","host":["{{base_url}}"],"path":["api","content-generate"]},"body":{"mode":"raw","raw":"{\n  \"course_name\": \"Data Science\",\n  \"content_type\": \"beginner\",\n  \"duration_hours\": 10,\n  \"duration_minutes\": 0,\n  \"preferences\": \"optional\"\n}"}}},
+        {"name": "Content Generate Health", "request": {"method":"GET","url":{"raw":"{{base_url}}/api/content-generate/health","host":["{{base_url}}"],"path":["api","content-generate","health"]}}},
+        {"name": "Content Generate Test", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/content-generate/test","host":["{{base_url}}"],"path":["api","content-generate","test"]},"body":{"mode":"raw","raw":"{\n  \"course_name\": \"Data Science\",\n  \"content_type\": \"beginner\",\n  \"duration_hours\": 10,\n  \"duration_minutes\": 0\n}"}}},
+        {"name": "Generate Detailed Content (bg)", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/content-generate/detailed-content","host":["{{base_url}}"],"path":["api","content-generate","detailed-content"]},"body":{"mode":"raw","raw":"{\n  \"course_data\": {\n    \"course_mastertitle_breakdown\": [ { \"master_title\": \"Intro\", \"subtitles\": [\"S1\"] } ]\n  },\n  \"course_name\": \"Sample Course\",\n  \"course_id\": 1\n}"}}}
+      ]
+    },
+    {
+      "name": "User Details",
+      "item": [
+        {"name": "Get User Details", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/userdetails","host":["{{base_url}}"],"path":["api","userdetails"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1\n}"}}},
+        {"name": "Update User Details", "request": {"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/userdetails/update","host":["{{base_url}}"],"path":["api","userdetails","update"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"user_name\": \"John\"\n}"}}},
+        {"name": "Insert User Details", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/userdetails/insert","host":["{{base_url}}"],"path":["api","userdetails","insert"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"user_name\": \"John\",\n  \"age\": 21,\n  \"mobile_number\": \"9999999999\",\n  \"mail_id\": \"john@example.com\",\n  \"city\": \"City\",\n  \"area_of_interest\": \"AI\",\n  \"highest_qualification\": \"BSc\",\n  \"year_of_passedout\": 2022,\n  \"designation\": \"Intern\",\n  \"ambition\": \"Engineer\",\n  \"current_organization\": \"Acme\",\n  \"job_title\": \"Trainee\",\n  \"work_experience\": 0,\n  \"linkedin_profile\": \"url\",\n  \"github_profile\": \"url\",\n  \"portfolio_website\": \"url\",\n  \"profile_picture_url\": \"url\"\n}"}}}
+      ]
+    },
+    {
+      "name": "User Persona",
+      "item": [
+        {"name": "Get User Persona", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/user/persona","host":["{{base_url}}"],"path":["api","user","persona"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1\n}"}}}
+      ]
+    },
+    {
+      "name": "Assessment Submission",
+      "item": [
+        {"name": "Submit Assessment", "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"{{base_url}}/api/submit-assessment","host":["{{base_url}}"],"path":["api","submit-assessment"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"course_id\": 1,\n  \"answers\": [ {\n    \"question_id\": 1, \"selected_option_id\": 2\n  } ]\n}"}}}
+      ]
+    }
+  ]
+}

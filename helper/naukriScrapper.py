@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from bs4 import BeautifulSoup
 
 # Set ChromeDriver path
-chrome_driver_path = "C:/Users/SudharsanDS/Downloads/chromedriver-win64/chromedriver-win64/chromedriver.exe"
+chrome_driver_path = "C:/Users/WELCOME/Downloads/chromedriver-win64/chromedriver-win64/chromedriver.exe"
 os.environ["CHROME_DRIVER_PATH"] = chrome_driver_path
 
 BASE_URL = "https://www.naukri.com"
@@ -106,7 +106,7 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 try:
     # URL to scrape
-    url = "https://www.naukri.com/developer-engineer-it-jobs-in-chennai?k=developer%2C%20engineer%2C%20it&l=chennai&nignbevent_src=jobsearchDeskGNB&experience=0&jobAge=1"
+    url = "https://www.naukri.com/software-development-software-testing-python-java-software-engineer-jobs-in-chennai?k=software%20development%2C%20software%20testing%2C%20python%2C%20java%2C%20software%20engineer&l=chennai&nignbevent_src=jobsearchDeskGNB&experience=0&jobAge=1"
     print(f"Loading page: {url}")
     driver.get(url)
     time.sleep(5)  # Wait for page to load
