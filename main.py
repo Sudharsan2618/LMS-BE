@@ -25,8 +25,16 @@ from flask import Flask
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["https://www.companion-lms.com"])
-# CORS(app, origins=["http://localhost:3000"])
+
+# Configure CORS with more comprehensive settings
+CORS(app, 
+     origins=["https://www.companion-lms.com", "https://companion-lms.com"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+     supports_credentials=True)
+
+# Alternative: If you want to allow all origins during development
+# CORS(app, origins="*")
 
 # Register blueprints
 app.register_blueprint(auth_bp)
