@@ -45,7 +45,7 @@ def ask_companian():
             max_output_tokens=2048,
         )
 
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
         response = model.generate_content(
             prompt,
             generation_config=generation_config,
@@ -64,7 +64,7 @@ def health_check():
 @ai_bp.route('/api/ai/test-gemini', methods=['GET'])
 def test_gemini():
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
         response = model.generate_content("Say hello!")
         return jsonify({"status": "success", "response": response.text})
     except Exception as e:

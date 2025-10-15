@@ -268,7 +268,7 @@ Links: [Comma-separated URLs here]"""
             max_output_tokens=2000,
         )
 
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
         response = model.generate_content(prompt, generation_config=generation_config)
         
         text = response.text.strip()
@@ -346,7 +346,7 @@ Guidelines for content generation:
             max_output_tokens=2000,
         )
 
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
         response = model.generate_content(prompt, generation_config=generation_config)
         
         print(f"Raw response for subtitle '{subtitle}': {response.text[:200]}...")
@@ -394,7 +394,7 @@ def generate_questions_for_content(content_list, course_name):
     # 10 company questions
     prompt_company = f"""Generate 10 high-standard multiple-choice questions that are most commonly asked by companies for '{course_name}'. Each question should have 4 options, and specify the correct answer and its index (1-based). Return as JSON array with fields: question, options (array), answer, answer_id (1-4).\n\nFormat:\n[{{'question': '...', 'options': ['A', 'B', 'C', 'D'], 'answer': '...', 'answer_id': 2}}, ...]"""
     
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash-lite')
     # Contextual questions
     resp1 = model.generate_content(prompt_contextual)
     try:
@@ -661,7 +661,7 @@ If course is "Data Science":
             max_output_tokens=3000,
         )
 
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
         response = model.generate_content(
             prompt,
             generation_config=generation_config,
@@ -700,7 +700,7 @@ Return JSON format:
     ]
 }}"""
 
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
         response = model.generate_content(prompt)
 
         clean_response = response.text.strip()
