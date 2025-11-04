@@ -18,6 +18,7 @@ from app.routes.course_routes import course_bp as course_management_bp
 from app.routes.admin_routes import admin_bp
 from app.routes.qc_batch_routes import qc_batch_bp
 from app.routes.ai_route import ai_bp
+from app.routes.flim_frame_ai import flim_frame_bp
 from app.routes.content_generate_route import content_generate_bp
 from app.routes.transaction_view_route import transaction_view_bp
 from app.routes.ppt_url_routes import ppt_url_bp
@@ -28,7 +29,7 @@ app = Flask(__name__)
 
 # Configure CORS with more comprehensive settings
 CORS(app, 
-     origins=["https://www.companion-lms.com", "https://companion-lms.com"],
+     origins=["https://www.companion-lms.com","https://v0-lms-homepage-mock.vercel.app", "https://companion-lms.com", "http://localhost:3000","*"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
      allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
      supports_credentials=True)
@@ -58,6 +59,7 @@ app.register_blueprint(course_management_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(qc_batch_bp)
 app.register_blueprint(ai_bp)
+app.register_blueprint(flim_frame_bp)
 app.register_blueprint(content_generate_bp)
 app.register_blueprint(transaction_view_bp)
 app.register_blueprint(ppt_url_bp)
