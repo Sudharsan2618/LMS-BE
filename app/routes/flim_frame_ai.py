@@ -528,6 +528,75 @@ def generate_answer_strict(question, retrieved_chunks, stream=False):
                 raise Exception(f"Failed to generate answer: {str(e)}")
 
 
+def is_greeting_or_conversational(question):
+    """
+    Check if the question is a greeting or conversational question.
+    
+    Args:
+        question: User's question
+        
+    Returns:
+        Tuple (is_greeting_or_conversational: bool, response: str or None)
+    """
+    question_lower = question.lower().strip()
+    
+    # Greetings
+    greetings = [
+        'hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 
+        'good evening', 'good night', 'howdy', 'sup', 'what\'s up', 'wassup'
+    ]
+    
+    # Conversational questions
+    conversational_patterns = [
+        'how can you help', 'what can you do', 'what do you do', 
+        'who are you', 'what are you', 'introduce yourself',
+        'tell me about yourself', 'how do you work', 'explain yourself',
+        'what is your purpose', 'what is your role', 'help me',
+        'what help', 'can you help', 'how are you', 'how are things'
+    ]
+    
+    # Check for greetings
+    for greeting in greetings:
+        if question_lower.startswith(greeting) or question_lower == greeting:
+            response = (
+                "Hello! I'm your AI assistant for the Learning Management System. "
+                "I can help you with questions about course materials, books, and learning content. "
+                "Feel free to ask me anything related to your studies!"
+            )
+            return True, response
+    
+    # Check for conversational questions
+    for pattern in conversational_patterns:
+        if pattern in question_lower:
+            response = (
+                "I'm your AI learning assistant! I can help you by:\n\n"
+                "📚 Answering questions about course materials and books in the system\n"
+                "💡 Explaining concepts from your learning resources\n"
+                "🔍 Finding relevant information from your study materials\n"
+                "📖 Providing insights based on the content you're studying\n\n"
+                "Just ask me any question related to your courses, and I'll search through the available "
+                "materials to give you accurate answers. If the information isn't in the system, I'll let you know."
+            )
+            return True, response
+    
+    # Check for thank you messages
+    if any(word in question_lower for word in ['thank', 'thanks', 'appreciate']):
+        response = (
+            "You're welcome! I'm here to help whenever you need assistance with your studies. "
+            "Feel free to ask me anything about your course materials!"
+        )
+        return True, response
+    
+    # Check for goodbye messages
+    if any(word in question_lower for word in ['bye', 'goodbye', 'see you', 'farewell', 'later']):
+        response = (
+            "Goodbye! Good luck with your studies. Feel free to come back anytime you need help!"
+        )
+        return True, response
+    
+    return False, None
+
+
 def ask_question(question, index=None, stream=False):
     """
     Main function to ask a question and get an answer.
@@ -540,6 +609,22 @@ def ask_question(question, index=None, stream=False):
     Returns:
         Answer string (if stream=False) or generator (if stream=True)
     """
+    # Check if it's a greeting or conversational question
+    is_conversational, response = is_greeting_or_conversational(question)
+    
+    if is_conversational:
+        if stream:
+            # For streaming, yield the response in chunks for smoother experience
+            chunk_size = 20  # Yield approximately 20 characters at a time
+            for i in range(0, len(response), chunk_size):
+                chunk = response[i:i + chunk_size]
+                if chunk:
+                    yield chunk
+            return
+        else:
+            return response
+    
+    # For actual questions, proceed with Pinecone lookup
     if index is None:
         index = init_pinecone()
     
