@@ -32,39 +32,45 @@ genai_client = None
 embedding_model = None
 
 # Try GEMINI_API_KEY first (same as ai_route.py), then GOOGLE_API_KEY, then fallback
+# Note: Don't raise exceptions at import time - allow graceful failure when endpoints are called
 try:
     # Check for GEMINI_API_KEY first (same as ai_route.py)
     gemini_api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if gemini_api_key:
-        import google.generativeai as genai
-        genai.configure(api_key=gemini_api_key)
-        genai_client = genai
-        USE_GEMINI_API = True
-    else:
-        raise ImportError("No GEMINI_API_KEY or GOOGLE_API_KEY found")
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=gemini_api_key)
+            genai_client = genai
+            USE_GEMINI_API = True
+        except Exception as e:
+            # Log but don't fail - will be caught when endpoint is called
+            print(f"Warning: Failed to initialize google.generativeai: {str(e)}")
+            pass
 except Exception as e:
+    pass
+
+# If USE_GEMINI_API not set, try new Google Gen AI SDK
+if not USE_GEMINI_API:
     try:
-        # Try new Google Gen AI SDK (if available)
         if os.environ.get("GOOGLE_API_KEY"):
             from google import genai as google_genai
             genai_client = google_genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
             USE_NEW_API = True
-        else:
-            raise ImportError("No API key found")
     except Exception:
-        # Last resort: Try Vertex AI (requires GCP setup)
-        try:
-            from vertexai.language_models import TextEmbeddingModel
-            model_name = EMBEDDING_MODEL if "textembedding" in EMBEDDING_MODEL.lower() else "textembedding-gecko@001"
-            if not model_name.startswith("textembedding-gecko"):
-                model_name = "textembedding-gecko@001"
-            embedding_model = TextEmbeddingModel.from_pretrained(model_name)
-            USE_VERTEX_AI = True
-        except Exception:
-            raise Exception(
-                "Unable to initialize Google Gen AI. Please set GEMINI_API_KEY or GOOGLE_API_KEY in your environment.\n"
-                "Get your API key from: https://makersuite.google.com/app/apikey"
-            )
+        pass
+
+# If still not initialized, try Vertex AI (last resort)
+if not USE_GEMINI_API and not USE_NEW_API:
+    try:
+        from vertexai.language_models import TextEmbeddingModel
+        model_name = EMBEDDING_MODEL if "textembedding" in EMBEDDING_MODEL.lower() else "textembedding-gecko@001"
+        if not model_name.startswith("textembedding-gecko"):
+            model_name = "textembedding-gecko@001"
+        embedding_model = TextEmbeddingModel.from_pretrained(model_name)
+        USE_VERTEX_AI = True
+    except Exception:
+        # Don't raise - will be handled when endpoints are called
+        pass
 
 
 def init_pinecone():
@@ -113,7 +119,7 @@ def embed_texts_genai(texts):
             # Get API key
             api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
             if not api_key:
-                raise Exception("GEMINI_API_KEY or GOOGLE_API_KEY not found")
+                raise Exception("GEMINI_API_KEY or GOOGLE_API_KEY not found. Please set it in your environment variables.")
             
             # Use embedding model from config, default to text-embedding-004
             embedding_model_name = EMBEDDING_MODEL
@@ -476,7 +482,16 @@ def generate_answer_strict(question, retrieved_chunks, stream=False):
     else:
         # Use google.generativeai (same as ai_route.py)
         try:
+            # Check if API key is available
+            gemini_api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+            if not gemini_api_key:
+                raise Exception(
+                    "GEMINI_API_KEY or GOOGLE_API_KEY not found. Please set it in your environment variables."
+                )
+            
             import google.generativeai as genai
+            genai.configure(api_key=gemini_api_key)
+            
             if not hasattr(genai, 'GenerativeModel'):
                 raise Exception("google.generativeai SDK not properly configured")
             
