@@ -42,6 +42,7 @@ def after_request(response):
     origin = request.headers.get('Origin')
     allowed_origins = ["https://www.companion-lms.com", "https://v0-lms-homepage-mock.vercel.app", "https://companion-lms.com", "http://localhost:3000"]
     
+    
     if origin in allowed_origins:
         response.headers.add('Access-Control-Allow-Origin', origin)
         response.headers.add('Access-Control-Allow-Credentials', 'true')
