@@ -22,17 +22,35 @@ from app.routes.flim_frame_ai import flim_frame_bp
 from app.routes.content_generate_route import content_generate_bp
 from app.routes.transaction_view_route import transaction_view_bp
 from app.routes.ppt_url_routes import ppt_url_bp
-from flask import Flask
-from flask_cors import CORS
+from flask import Flask, request
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
 # Configure CORS with more comprehensive settings
 CORS(app, 
-     origins=["https://www.companion-lms.com","https://v0-lms-homepage-mock.vercel.app", "https://companion-lms.com", "http://localhost:3000","*"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
-     supports_credentials=True)
+     origins=["https://www.companion-lms.com", "https://v0-lms-homepage-mock.vercel.app", "https://companion-lms.com", "http://localhost:3000"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+     supports_credentials=True,
+     expose_headers=["Content-Type", "Authorization"],
+     max_age=3600)
+
+# Ensure CORS headers are set for all responses, including errors
+@app.after_request
+def after_request(response):
+    origin = request.headers.get('Origin')
+    allowed_origins = ["https://www.companion-lms.com", "https://v0-lms-homepage-mock.vercel.app", "https://companion-lms.com", "http://localhost:3000"]
+    
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept')
+        response.headers.add('Access-Control-Expose-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Max-Age', '3600')
+    
+    return response
 
 # Alternative: If you want to allow all origins during development
 # CORS(app, origins="*")
